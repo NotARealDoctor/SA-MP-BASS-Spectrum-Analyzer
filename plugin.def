@@ -1,0 +1,8 @@
+LIBRARY	Spectrum
+EXPORTS
+	Supports
+	Load
+	Unload
+	AmxLoad
+	AmxUnload
+	
