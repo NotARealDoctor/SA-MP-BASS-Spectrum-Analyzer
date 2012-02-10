@@ -104,7 +104,7 @@ PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_PlayStream(AMX* amx, cell* params)
 		char* url = new char[ len ];
         amx_GetString(url, addr, 0, len);
 
-		if (!(chan=BASS_StreamCreateURL(url,0,BASS_STREAM_DECODE|BASS_STREAM_AUTOFREE,NULL,0)))
+		if (!(chan=BASS_StreamCreateURL(url,0,BASS_STREAM_DECODE,NULL,0)))
 		{
 			delete [] url;
 			return 0;
