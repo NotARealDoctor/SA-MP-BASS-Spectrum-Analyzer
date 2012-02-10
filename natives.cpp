@@ -13,7 +13,7 @@
  *  
  *  The Original Code is the BASS Spectrum Analyzer SA:MP plugin.
  *  
- *  The Initial Developer of the Original Code is Scott Reed  - h02@h02.org
+ *  The Initial Developer of the Original Code is Scott Reed - h02@h02.org
  *  Portions created by the Initial Developer are Copyright (C) 2012
  *  the Initial Developer. All Rights Reserved.
  *  
@@ -143,8 +143,8 @@ PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_ChannelGetLevel(AMX* amx, cell* params)
 	DWORD level, left, right;
 	if(level=BASS_ChannelGetLevel(chan))
 	{
-		left=LOWORD(level);
-		right=HIWORD(level);
+		left=MulDiv(100, LOWORD(level), 32768); // set left peak
+		right=MulDiv(100, HIWORD(level), 32768); // set right peak
 
 		cell* addr[2] = {NULL, NULL};
     
