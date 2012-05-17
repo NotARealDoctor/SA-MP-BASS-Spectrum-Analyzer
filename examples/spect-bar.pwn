@@ -24,13 +24,13 @@
 #include <spectrum>
 
 #define BARS 128
-new objects[BARS];
+new objects[BARS], handle;
 new timer;
 
 public OnFilterScriptInit()
 {
     //initialize the output device, receive the stream
-    if(BASS_Init() && BASS_PlayStream("http://yp.shoutcast.com/sbin/tunein-station.pls?id=2206678"))
+    if(BASS_Init() && (handle=BASS_PlayStream("http://yp.shoutcast.com/sbin/tunein-station.pls?id=2206678")))
 	{
 		timer = SetTimer("Update", 25, true); //40hz timer to fetch the fft data
 
@@ -54,7 +54,7 @@ forward Update();
 public Update()
 {
 	new Float:fft[BARS];
-	if(BASS_ChannelGetData(fft, BASS_DATA_FFT256))
+	if(BASS_ChannelGetData(handle, fft, BASS_DATA_FFT256))
 	{
 	    for(new x;x<BARS;x++)
 	    {

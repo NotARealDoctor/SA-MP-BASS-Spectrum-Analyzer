@@ -27,13 +27,12 @@
 #include <a_samp>
 #include <spectrum>
 
-new objects[28];
-new timer;
+new objects[28], handle, timer;
 
 public OnFilterScriptInit()
 {
 	//initialize the output device, receive the stream
-	if(BASS_Init() && BASS_PlayStream("http://yp.shoutcast.com/sbin/tunein-station.pls?id=860870"))
+	if(BASS_Init() && (handle=BASS_PlayStream("http://yp.shoutcast.com/sbin/tunein-station.pls?id=860870")))
 	{
 		timer = SetTimer("Update", 25, true); //40hz timer to fetch the fft data
         //create the laser array at pershing square (lspd)
@@ -54,7 +53,7 @@ forward Update();
 public Update()
 {
 	new Float:fft[128];
-	if(BASS_ChannelGetData(fft, BASS_DATA_FFT256))
+	if(BASS_ChannelGetData(handle, fft, BASS_DATA_FFT256))
 	{
 		new b0;
 		for(new x;x<sizeof(objects);x++)

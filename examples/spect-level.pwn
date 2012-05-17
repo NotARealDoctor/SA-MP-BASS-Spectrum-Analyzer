@@ -23,13 +23,12 @@
 #include <a_samp>
 #include <spectrum>
 
-new obj[2];
-new timer;
+new obj[2], handle, timer;
 
 public OnFilterScriptInit()
 {
     //initialize the output device, receive the stream
-    if(BASS_Init() && BASS_PlayStream("http://yp.shoutcast.com/sbin/tunein-station.pls?id=7225"))
+    if(BASS_Init() && (handle=BASS_PlayStream("http://yp.shoutcast.com/sbin/tunein-station.pls?id=7225")))
 	{
 		timer = SetTimer("Update", 25, true); //40hz timer to fetch the fft data
 
@@ -52,7 +51,7 @@ forward Update();
 public Update()
 {
 	new left, right;
-	if(BASS_ChannelGetLevel(left, right))
+	if(BASS_ChannelGetLevel(handle, left, right))
 	{
 	    MoveObject(obj[0], 1488.0, -1660.0, 12.6+(left*0.0001), 5.0, 90.0, 0.0, 0.0);
 	    MoveObject(obj[1], 1487.5, -1660.0, 12.6+(right*0.0001), 5.0, 90.0, 0.0, 0.0);

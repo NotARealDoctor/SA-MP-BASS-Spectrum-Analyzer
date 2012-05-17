@@ -23,13 +23,15 @@
  */
 
 #include <stdio.h>
+#include <vector>
 
 #include "amx/amx.h"
 #include "plugincommon.h"
 #include "natives.h"
 #include "bass.h"
 
-HSTREAM chan;
+using namespace std;
+vector<HSTREAM> chan;
 
 //----------------------------------------------------------
 
@@ -74,6 +76,15 @@ PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_Free(AMX* amx, cell* params)
 {
 	if(BASS_Free())
 	{
+		if(chan.size() > 0) 
+		{
+			int i = 0;
+			while(i != chan.size()) 
+			{
+				chan.erase(chan.begin()+i);
+			}
+		}
+
 		m_iOperatingMode = SPECTRUM_MODE_NONE;
 		return 1;
 	}
@@ -104,25 +115,29 @@ PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_PlayStream(AMX* amx, cell* params)
 		char* url = new char[ len ];
         amx_GetString(url, addr, 0, len);
 
-		if (!(chan=BASS_StreamCreateURL(url,0,BASS_STREAM_DECODE,NULL,0)))
+		HSTREAM tempchan;
+		if (!(tempchan=BASS_StreamCreateURL(url,0,BASS_STREAM_DECODE,NULL,0)))
 		{
 			delete [] url;
 			return 0;
 		}
 
-		BASS_ChannelPlay(chan,FALSE);
+		chan.push_back(tempchan);
 		delete [] url;
-		return 1;
+		return (cell)chan.size();
 	}
 	return 0;
 }
 
 //----------------------------------------------------------
-// native BASS_StopStream();
+// native BASS_StopStream(handle);
 PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_StopStream(AMX* amx, cell* params)
 {
-	if(BASS_ChannelStop(chan))
+	CHECK_PARAMS("BASS_ChannelGetLevel", 1);
+	unsigned int cID = params[1]-1;
+	if(BASS_ChannelStop(chan[cID]))
 	{
+		chan.erase(chan.begin()+cID);
 		m_iOperatingMode = SPECTRUM_MODE_NONE;
 		return 1;
 	}
@@ -130,26 +145,27 @@ PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_StopStream(AMX* amx, cell* params)
 }
 
 //----------------------------------------------------------
-// native BASS_ChannelGetLevel(&left, &right)
+// native BASS_ErrorGetCode()
 PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_ErrorGetCode(AMX* amx, cell* params)
 {
 	return BASS_ErrorGetCode();
 }
 //----------------------------------------------------------
-// native BASS_ChannelGetLevel(&left, &right)
+// native BASS_ChannelGetLevel(handle, &left, &right)
 PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_ChannelGetLevel(AMX* amx, cell* params)
 {
-	CHECK_PARAMS("BASS_ChannelGetLevel", 2);
+	CHECK_PARAMS("BASS_ChannelGetLevel", 3);
+	unsigned int cID = params[1]-1;
 	DWORD level, left, right;
-	if(level=BASS_ChannelGetLevel(chan))
+	if(level=BASS_ChannelGetLevel(chan[cID]))
 	{
 		left=MulDiv(100, LOWORD(level), 32768); // set left peak
 		right=MulDiv(100, HIWORD(level), 32768); // set right peak
 
 		cell* addr[2] = {NULL, NULL};
     
-		amx_GetAddr(amx, params[1], &addr[0]);
-		amx_GetAddr(amx, params[2], &addr[1]);
+		amx_GetAddr(amx, params[2], &addr[0]);
+		amx_GetAddr(amx, params[3], &addr[1]);
 
 		*addr[0] = left;
 		*addr[1] = right;
@@ -159,11 +175,12 @@ PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_ChannelGetLevel(AMX* amx, cell* params)
 }
 
 //----------------------------------------------------------
-// native BASS_ChannelGetData(buffer[], length)
+// native BASS_ChannelGetData(handle, buffer[], length)
 PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_ChannelGetData(AMX* amx, cell* params)
 {
-	CHECK_PARAMS("BASS_ChannelGetData", 2);
-	int length = (int)params[2];
+	CHECK_PARAMS("BASS_ChannelGetData", 3);
+	int length = (int)params[3];
+	unsigned int cID = params[1]-1;
 	DWORD clength;
 	switch(length)
 	{
@@ -193,13 +210,13 @@ PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_ChannelGetData(AMX* amx, cell* params)
 	}
 	float* buffer = new float[length];
 
-	if(BASS_ChannelGetData(chan,buffer,clength) == -1)// get the FFT data
+	if(BASS_ChannelGetData(chan[cID],buffer,clength) == -1)// get the FFT data
 	{
 		return 0;
 	}
 
 	cell* addr = NULL;
-	amx_GetAddr(amx, params[1], &addr);
+	amx_GetAddr(amx, params[2], &addr);
 	for(int i = 0, l = length; i < l; i++)
 	{
 		*(addr + i) = amx_ftoc(buffer[i]);

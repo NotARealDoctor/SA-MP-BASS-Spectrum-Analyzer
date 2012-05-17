@@ -40,14 +40,12 @@
 
 #define BARS 128
 
-new objects[BARS];
-new Float:fftvalue[BARS];
-new timer;
+new objects[BARS], Float:fftvalue[BARS], handle, timer;
 
 public OnFilterScriptInit()
 {
     //initialize the output device, receive the stream
-    if(BASS_Init() && BASS_PlayStream("http://yp.shoutcast.com/sbin/tunein-station.pls?id=502985"))
+    if(BASS_Init() && (handle=BASS_PlayStream("http://yp.shoutcast.com/sbin/tunein-station.pls?id=502985")))
  	{
 		timer = SetTimer("Update", 25, true); //40hz timer to fetch the fft data
  	}
@@ -65,7 +63,7 @@ forward Update();
 public Update()
 {
 	new Float:fft[BARS];
-	if(BASS_ChannelGetData(fft, BASS_DATA_FFT256))
+	if(BASS_ChannelGetData(handle, fft, BASS_DATA_FFT256))
 	{
 	    for(new x;x<BARS;x++)
 	    {
@@ -74,7 +72,7 @@ public Update()
 			    if(!objects[x])
 			    {
 				    new left, right;
-				    if(BASS_ChannelGetLevel(left, right))
+				    if(BASS_ChannelGetLevel(handle, left, right))
 				    {
 					    printf("Beat detected at %d - %f, %d %d", x, fft[x]-fftvalue[x], left, right);
 					    
