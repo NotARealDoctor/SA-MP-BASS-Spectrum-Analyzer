@@ -227,3 +227,21 @@ PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_ChannelGetData(AMX* amx, cell* params)
 }
 
 //----------------------------------------------------------
+// native BASS_ChannelGetLength(handle)
+PLUGIN_EXTERN_C cell AMX_NATIVE_CALL n_ChannelGetLength(AMX* amx, cell* params)
+{
+	CHECK_PARAMS("BASS_ChannelGetLength", 1);
+	unsigned int cID = params[1]-1;
+	QWORD len;
+	double time;
+
+	if(len=BASS_ChannelGetLength(chan[cID], BASS_POS_BYTE))
+	{
+		if(time=BASS_ChannelBytes2Seconds(chan[cID], len)) 
+		{
+			return (cell)time;
+		}
+	}
+	return 0;
+}
+//----------------------------------------------------------

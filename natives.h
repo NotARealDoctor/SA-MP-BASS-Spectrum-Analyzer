@@ -21,10 +21,10 @@
 native BASS_Init();
 native BASS_Free();
 native BASS_PlayStream(url[]);
-native BASS_StopStream();
+native BASS_StopStream(chan);
 native BASS_ErrorGetCode();
-native BASS_ChannelGetData(buffer[], length);
-native BASS_ChannelGetLevel(&left, &right);
+native BASS_ChannelGetData(chan, buffer[], length);
+native BASS_ChannelGetLevel(chan, &left, &right);
 */
 
 DECL_AMX_NATIVE(Init);
@@ -34,3 +34,4 @@ DECL_AMX_NATIVE(StopStream);
 DECL_AMX_NATIVE(ErrorGetCode);
 DECL_AMX_NATIVE(ChannelGetData);
 DECL_AMX_NATIVE(ChannelGetLevel);
+DECL_AMX_NATIVE(ChannelGetLength);

@@ -63,6 +63,7 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad( AMX *amx )
 		DECL_AMX_MAP(ErrorGetCode),
 		DECL_AMX_MAP(ChannelGetData),
 		DECL_AMX_MAP(ChannelGetLevel),
+		DECL_AMX_MAP(ChannelGetLength),
 		{ 0, 0 }
 	};
 
